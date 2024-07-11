@@ -118,7 +118,7 @@ export default {
       }
 
       try {
-        const response = await axios.post('http://localhost:3000/api/exam/submit', {
+        const response = await axios.post('https://edu-platform-minz-long-back-end.vercel.app/api/exam/submit', {
           quizId: currentQuiz.value.id,
           correctAnswers: correctAnswers.value,
           totalQuestions: currentQuiz.value.questions.length,
