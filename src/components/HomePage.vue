@@ -141,7 +141,7 @@ export default {
 
     const fetchTestimonials = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/testimonials');
+        const response = await axios.get('https://edu-platform-minz-long-back-end.vercel.app/api/testimonials');
         testimonials.value = response.data;
       } catch (error) {
         console.error('Error fetching testimonials:', error);
@@ -156,7 +156,7 @@ export default {
       };
 
       try {
-        const response = await axios.post('http://localhost:3000/api/testimonials', testimonial, {
+        const response = await axios.post('https://edu-platform-minz-long-back-end.vercel.app/api/testimonials', testimonial, {
           headers: { Authorization: `Bearer ${store.state.token}` }
         });
         testimonials.value.push(response.data);
@@ -178,7 +178,7 @@ export default {
 
     const updateTestimonial = async () => {
       try {
-        const response = await axios.patch(`http://localhost:3000/api/testimonials/${editableTestimonial.value._id}`, {
+        const response = await axios.patch(`https://edu-platform-minz-long-back-end.vercel.app/api/testimonials/${editableTestimonial.value._id}`, {
           message: editableTestimonial.value.message
         }, {
           headers: { Authorization: `Bearer ${store.state.token}` }
@@ -194,7 +194,7 @@ export default {
 
     const deleteTestimonial = async (id) => {
       try {
-        await axios.delete(`http://localhost:3000/api/testimonials/${id}`, {
+        await axios.delete(`https://edu-platform-minz-long-back-end.vercel.app/api/testimonials/${id}`, {
           headers: { Authorization: `Bearer ${store.state.token}` }
         });
         testimonials.value = testimonials.value.filter(testimonial => testimonial._id !== id);
