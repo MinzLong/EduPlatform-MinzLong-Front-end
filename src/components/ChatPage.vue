@@ -76,7 +76,7 @@ export default {
         this.socket.send(JSON.stringify(messageData));
 
         // Lưu tin nhắn vào server
-        await axios.post(`http://localhost:3000/api/chat/${this.chattingWith._id}`, messageData, {
+        await axios.post(`https://edu-platform-minz-long-back-end.vercel.app/api/chat/${this.chattingWith._id}`, messageData, {
           headers: { 'x-auth-token': this.$store.state.token }
         });
 
@@ -90,7 +90,7 @@ export default {
     },
     async fetchChatHistory() {
       try {
-        const url = `http://localhost:3000/api/chat/${this.chattingWith._id}`;
+        const url = `https://edu-platform-minz-long-back-end.vercel.app/api/chat/${this.chattingWith._id}`;
         const response = await axios.get(url, {
           headers: { 'x-auth-token': this.$store.state.token }
         });

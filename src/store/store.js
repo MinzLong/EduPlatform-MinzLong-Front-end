@@ -103,7 +103,7 @@ export default createStore({
     },
     async likeCourse({ commit, state }, courseId) {
       try {
-        await axios.post(`http://localhost:3000/api/likes/${courseId}`, {}, {
+        await axios.post(`https://edu-platform-minz-long-back-end.vercel.app/api/likes/${courseId}`, {}, {
           headers: { 'x-auth-token': state.token }
         });
         await this.dispatch('fetchLikes', courseId);
@@ -113,7 +113,7 @@ export default createStore({
     },
     async fetchLikes({ commit }, courseId) {
       try {
-        const response = await axios.get(`http://localhost:3000/api/likes/${courseId}`);
+        const response = await axios.get(`https://edu-platform-minz-long-back-end.vercel.app/api/likes/${courseId}`);
         commit('setLikes', { courseId, likes: response.data.likes });
       } catch (error) {
         console.error('Failed to fetch likes:', error);
@@ -121,7 +121,7 @@ export default createStore({
     },
     async fetchUsers({ commit, state }) {
       try {
-        const response = await axios.get('http://localhost:3000/api/users', {
+        const response = await axios.get('https://edu-platform-minz-long-back-end.vercel.app/api/users', {
           headers: { 'x-auth-token': state.token }
         });
         commit('setUsers', response.data); // Update according to your backend response

@@ -254,7 +254,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.post(`http://localhost:3000/api/courses/${course.id}/like`, {}, {
+        const response = await axios.post(`https://edu-platform-minz-long-back-end.vercel.app/api/courses/${course.id}/like`, {}, {
           headers: { Authorization: `Bearer ${store.state.token}` }
         });
         if (course.likedBy.includes(store.state.user._id)) {
@@ -278,7 +278,7 @@ export default {
       try {
         const allCourses = [...featuredCourses.value, ...specialCourses.value];
         for (const course of allCourses) {
-          const response = await axios.get(`http://localhost:3000/api/courses/${course.id}/likes`);
+          const response = await axios.get(`https://edu-platform-minz-long-back-end.vercel.app/api/courses/${course.id}/likes`);
           course.likes = response.data.likes;
           course.likedBy = response.data.likedBy;
         }
