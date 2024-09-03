@@ -6,6 +6,7 @@ import LoginPage from './components/LoginPage.vue';
 import RegisterPage from './components/RegisterPage.vue';
 import ExamPage from './components/ExamPage.vue';
 import LeaderboardPage from './components/Leaderboard.vue';
+import ChatPage from './components/ChatPage.vue';
 import store from './store/store';
 
 const routes = [
@@ -15,7 +16,8 @@ const routes = [
   { path: '/login', component: LoginPage },
   { path: '/register', component: RegisterPage },
   { path: '/exam', component: ExamPage, meta: { requiresAuth: true } },
-  { path: '/leaderboard', component: LeaderboardPage, meta: { requiresAuth: true } }
+  { path: '/leaderboard', component: LeaderboardPage, meta: { requiresAuth: true } },
+  { path: '/chat', component: ChatPage, meta: { requiresAuth: true } } // Chat page route
 ];
 
 const router = createRouter({

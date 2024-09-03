@@ -20,6 +20,9 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/leaderboard">Leaderboard</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/chat">Chat</router-link> <!-- Thêm mục Chat -->
+            </li>
           </ul>
           <div v-if="isAuthenticated" class="d-flex">
             <span class="navbar-text me-3">Welcome, {{ user?.email }}</span>

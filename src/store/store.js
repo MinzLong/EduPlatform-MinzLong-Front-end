@@ -7,6 +7,8 @@ export default createStore({
     user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || '',
     completedCourses: [],
+    likes: {},
+    users: [] // List of users for chat
   },
   mutations: {
     setAuthentication(state, status) {
@@ -28,9 +30,17 @@ export default createStore({
       state.user = null;
       state.token = '';
       state.completedCourses = [];
+      state.likes = {};
+      state.users = []; // Reset users when logout
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     },
+    setLikes(state, { courseId, likes }) {
+      state.likes = { ...state.likes, [courseId]: likes };
+    },
+    setUsers(state, users) {
+      state.users = users;
+    }
   },
   actions: {
     async login({ commit }, userData) {
@@ -86,9 +96,40 @@ export default createStore({
         await axios.post('http://localhost:3000/api/userCourses/complete', { courseId }, {
           headers: { 'x-auth-token': state.token }
         });
-        await this.dispatch('fetchCompletedCourses'); // Refetch completed courses
+        await this.dispatch('fetchCompletedCourses');
       } catch (error) {
         console.error('Failed to mark course as completed:', error);
+      }
+    },
+    async likeCourse({ commit, state }, courseId) {
+      try {
+        await axios.post(`http://localhost:3000/api/likes/${courseId}`, {}, {
+          headers: { 'x-auth-token': state.token }
+        });
+        await this.dispatch('fetchLikes', courseId);
+      } catch (error) {
+        console.error('Failed to like course:', error);
+      }
+    },
+    async fetchLikes({ commit }, courseId) {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/likes/${courseId}`);
+        commit('setLikes', { courseId, likes: response.data.likes });
+      } catch (error) {
+        console.error('Failed to fetch likes:', error);
+      }
+    },
+    async fetchUsers({ commit, state }) {
+      try {
+        const response = await axios.get('http://localhost:3000/api/users', {
+          headers: { 'x-auth-token': state.token }
+        });
+        commit('setUsers', response.data); // Update according to your backend response
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        if (error.response && error.response.status === 401) {
+          commit('clearAuthData'); // Clear authentication data on 401 error
+        }
       }
     },
     logout({ commit }) {
@@ -98,5 +139,7 @@ export default createStore({
   getters: {
     isAuthenticated: state => state.isAuthenticated,
     completedCourses: state => state.completedCourses,
+    getLikes: state => (courseId) => state.likes[courseId] || 0,
+    users: state => state.users // Getter for users
   },
 });
