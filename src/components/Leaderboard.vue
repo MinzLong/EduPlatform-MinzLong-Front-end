@@ -35,7 +35,7 @@ export default {
 
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get('https://edu-platform-minz-long-back-end.vercel.app/api/exam/leaderboard');
+        const response = await axios.get('http://localhost:3000/api/exam/leaderboard');
         leaderboards.value = response.data;
       } catch (error) {
         console.error('Error fetching leaderboard:', error.response ? error.response.data : error.message);

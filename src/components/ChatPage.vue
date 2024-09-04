@@ -29,18 +29,17 @@
 
 <script>
 import axios from 'axios';
-import Pusher from 'pusher-js';
 
 export default {
   data() {
     return {
-      pusher: null,
+      socket: null,
       selectedUserId: null,
       chattingWith: null,
       message: '',
       messages: [],
       error: null,
-      currentUserId: this.$store.state.user._id,
+      currentUserId: this.$store.state.user._id, // Thêm ID người dùng hiện tại
       currentUserName: `${this.$store.state.user.firstName} ${this.$store.state.user.lastName}`,
     };
   },
@@ -56,39 +55,42 @@ export default {
         this.chattingWith = this.users.find(user => user._id === this.selectedUserId);
         this.messages = []; // Clear previous messages
         await this.fetchChatHistory();
-        this.initializePusher(); // Initialize Pusher when starting a chat
+        this.connectSocket(); // Kết nối WebSocket khi bắt đầu chat
       } catch (error) {
         console.error('Failed to start chat:', error);
         this.error = 'Failed to start chat. Please try again.';
       }
     },
     async sendMessage() {
-        try {
-          if (this.message.trim() === '') return;
+      try {
+        if (this.message.trim() === '') return;
 
-          const messageData = {
-            senderId: this.currentUserId,
-            senderName: this.currentUserName,
-            text: this.message,
-            receiverId: this.chattingWith._id
-          };
+        const messageData = {
+          senderId: this.currentUserId,
+          senderName: this.currentUserName,
+          text: this.message,
+          receiverId: this.chattingWith._id
+        };
 
-          // Ensure the URL matches the server.js API route exactly
-          const apiUrl = `https://edu-platform-minz-long-back-end.vercel.app/api/chat/${this.chattingWith._id}/send`;
+        // Gửi tin nhắn qua WebSocket
+        this.socket.send(JSON.stringify(messageData));
 
-          await axios.post(apiUrl, messageData, {
-            headers: { 'x-auth-token': this.$store.state.token }
-          });
+        // Lưu tin nhắn vào server
+        await axios.post(`http://localhost:3000/api/chat/${this.chattingWith._id}`, messageData, {
+          headers: { 'x-auth-token': this.$store.state.token }
+        });
 
-          this.message = ''; // Clear the input
-        } catch (error) {
-          console.error('Failed to send message:', error);
-          this.error = 'Failed to send message. Please try again.';
-        }
-      },
+        // Sau khi gửi, bạn chỉ cần xóa nội dung trong ô nhập tin nhắn
+        this.message = '';
+        this.scrollToBottom(); // Tự động cuộn xuống cuối cùng
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        this.error = 'Failed to send message. Please try again.';
+      }
+    },
     async fetchChatHistory() {
       try {
-        const url = `https://edu-platform-minz-long-back-end.vercel.app/api/chat/${this.chattingWith._id}`;
+        const url = `http://localhost:3000/api/chat/${this.chattingWith._id}`;
         const response = await axios.get(url, {
           headers: { 'x-auth-token': this.$store.state.token }
         });
@@ -108,25 +110,28 @@ export default {
         }
       }
     },
-    initializePusher() {
-      if (this.pusher) {
-        this.pusher.unsubscribe(`chat-${this.chattingWith._id}`);
+    connectSocket() {
+      if (this.socket) {
+        this.socket.close();
       }
 
-      this.pusher = new Pusher('0c189fc2aa5045660e58', {
-        cluster: 'ap1',
-        encrypted: true,
-      });
+      this.socket = new WebSocket(`ws://localhost:3000/${this.chattingWith._id}`);
 
-      const channel = this.pusher.subscribe(`chat-${this.chattingWith._id}`);
-      channel.bind('message', (data) => {
-        this.messages.push({
-          senderId: data.senderId,
-          senderName: data.senderName,
-          text: data.text,
-        });
+      this.socket.onmessage = (event) => {
+        const messageData = JSON.parse(event.data);
+        this.messages.push(messageData); // Cập nhật giao diện khi nhận được tin nhắn mới
         this.scrollToBottom(); // Tự động cuộn xuống cuối cùng
-      });
+      };
+
+
+      this.socket.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        this.error = 'WebSocket connection failed. Please try again.';
+      };
     },
     scrollToBottom() {
       this.$nextTick(() => {
@@ -145,8 +150,8 @@ export default {
     }
   },
   beforeDestroy() {
-    if (this.pusher) {
-      this.pusher.unsubscribe(`chat-${this.chattingWith._id}`);
+    if (this.socket) {
+      this.socket.close();
     }
   }
 };
